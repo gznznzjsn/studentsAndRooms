@@ -1,14 +1,12 @@
-import json
+from services.room_service import *
 
-from entities import student
+students = input("Enter the path to students.json ")
+student_list = RoomService.get_student_list(students)
 
-with open("resources/students.json") as f:
-    unparsed_students = json.load(f)
+rooms = input("Enter the path to rooms.json ")
+room_dictionary = RoomService.get_room_dictionary(rooms)
 
-students = []
-for i in range(0, len(unparsed_students)):
-    students.append(student.Student(unparsed_students[i]["id"], unparsed_students[i]["name"],
-                                    unparsed_students[i]["room"]))
+RoomService.fulfill_the_dorm(student_list, room_dictionary)
 
-for i in range(0, len(students)):
-    print(students[i])
+format = input("Would you like to save as XML or JSON? ")
+RoomService.save_as(format, room_dictionary)
