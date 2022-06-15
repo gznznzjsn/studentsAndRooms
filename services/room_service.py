@@ -15,6 +15,26 @@ class RoomService(object):
         return student_list
 
     @staticmethod
+    def get_student_list_as_tuples(filepath):
+        with open(filepath) as input_file:
+            strings = json.load(input_file)
+        student_list = []
+        for student in strings:
+            student_list.append((student["id"], student["name"],
+                                 student["room"]
+                                 ))
+        return student_list
+
+    @staticmethod
+    def get_room_list_as_tuples(filepath):
+        with open(filepath) as input_file:
+            strings = json.load(input_file)
+        room_list = []
+        for room in strings:
+            room_list.append((room["id"], room["name"]))
+        return room_list
+
+    @staticmethod
     def get_room_dictionary(filepath):
         with open(filepath) as input_file:
             strings = json.load(input_file)
