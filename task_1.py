@@ -1,12 +1,12 @@
-from services.room_service import *
+from services.room_service import get_student_list, get_room_dictionary, fulfill_the_dorm, save_as
 
 students = input("Enter the path to students.json ")
-student_list = RoomService.get_student_list(students)
+student_list = get_student_list(students)
 
 rooms = input("Enter the path to rooms.json ")
-room_dictionary = RoomService.get_room_dictionary(rooms)
+room_dictionary = get_room_dictionary(rooms)
 
-RoomService.fulfill_the_dorm(student_list, room_dictionary)
+fulfill_the_dorm(student_list, room_dictionary)
 
-format = input("Would you like to save as XML or JSON? ")
-RoomService.save_as(format, room_dictionary)
+output_format = input("Would you like to save as XML or JSON? ")
+save_as(output_format, room_dictionary)

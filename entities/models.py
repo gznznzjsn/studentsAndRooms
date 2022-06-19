@@ -9,10 +9,11 @@ class Student(BaseModel):
 
     id = Column(Integer(), primary_key=True)
     birthday = Column(DateTime())
-    student_id = Column(Integer)
+    student_id = Column(Integer())
     name = Column(String(30))
-    room_id = Column(ForeignKey("rooms.id"))
+    room = Column(Integer())
     sex = Column(String(1))
+    room_id = Column(ForeignKey("rooms.id"))
 
 
 class Room(BaseModel):
