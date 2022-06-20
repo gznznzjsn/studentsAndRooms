@@ -1,7 +1,7 @@
 import json
 import xml.etree.ElementTree as ElementTree
 
-from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, select, func, text, exists
+from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, select, func, Index
 
 from entities.models import Room, Student
 
@@ -44,6 +44,20 @@ def declare_rooms_table(metadata):
                  Column('room_id', Integer()),
                  Column('name', String(10))
                  )
+
+
+def create_indexes(engine):
+    idx_rooms_id = Index("idx_rooms_id", Room.id)
+    idx_rooms_id.create(bind=engine)
+    idx_students_room_id = Index("idx_students_room_id", Student.room_id)
+    idx_students_room_id.create(bind=engine)
+
+
+def create_empty_tables(metadata, engine):
+    declare_rooms_table(metadata)
+    declare_students_table(metadata)
+    metadata.drop_all(engine)
+    metadata.create_all(engine)
 
 
 def write_amount_in_rooms(output_format, session):
@@ -121,19 +135,26 @@ def write_max_age_margin_rooms(output_format, session):
             json.dump(dict_list, output_file)
 
 
-#not done yet
+# почти все, кроме 6, 221, 222, 396, 419,484,579,623,736
 def write_mixed_rooms(output_format, session):
-    rows = session.query(Room, Student).join(Student).group_by(Room.id).group_by(Student.sex)
+    table = (select(Room.room_id, Room.name.label("room_name"), Student.sex).join(Student).group_by(Room.id).group_by(
+        Student.sex))
+    rows = session.query(table.c.room_id, table.c.room_name).group_by(table.c.room_id).having(
+        func.count(table.c.sex) == 2)
     if str(output_format).upper() == "XML":
         dorm = ElementTree.Element('dorm')
         description = ElementTree.SubElement(dorm, "description")
         description.text = "Rooms with both sexes"
         rooms = ElementTree.SubElement(dorm, "rooms")
-        for room_model, student_model in rows:
+        for room_id, room_name in rows:
             room = ElementTree.SubElement(rooms, "room")
-            room.set("id", str(room_model.room_id))
-            room.set("name", room_model.name)
-            room.set("student_name",student_model.name)
-            room.set("sex",student_model.sex)
+            room.set("id", str(room_id))
+            room.set("room_name", room_name)
         output_file = open("./resources/output/mixed_rooms.xml", "w")
         output_file.write(ElementTree.tostring(dorm).decode('utf-8'))
+    if str(output_format).upper() == "JSON":
+        dict_list = []
+        for room_id, room_name in rows:
+            dict_list.append({"id": room_id, "name": room_name})
+        with open('./resources/output/mixed_rooms.json', 'w') as output_file:
+            json.dump(dict_list, output_file)

@@ -1,28 +1,32 @@
-from sqlalchemy import create_engine, MetaData, select, func
-from sqlalchemy.orm import sessionmaker, query, Session
+from getpass import getpass
 
-from entities.models import Room, Student
-from services.db_service import load_students_from_json_to_db, load_rooms_from_json_to_db, \
-    declare_students_table, declare_rooms_table, write_amount_in_rooms, write_min_average_age_rooms, \
-    write_max_age_margin_rooms, write_mixed_rooms
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import sessionmaker
 
-engine = create_engine("mysql+mysqlconnector://root:1q2w3e@localhost/dorm")
+from services.db_service import write_amount_in_rooms, write_min_average_age_rooms, \
+    write_max_age_margin_rooms, write_mixed_rooms, create_indexes, create_empty_tables, load_students_from_json_to_db, \
+    load_rooms_from_json_to_db
+
+host = "localhost"
+user = input("Username: ")
+password = getpass("Password: ")
+database = input("Database: ")
+engine = create_engine(f"mysql+mysqlconnector://{user}:{password}@{host}/{database}")
 metadata = MetaData()
 factory = sessionmaker(bind=engine)
 session = factory()
 
-# declare_rooms_table(metadata)
-# declare_students_table(metadata)
-# metadata.drop_all(engine)
-# metadata.create_all(engine)
-#
-#
-# load_rooms_from_json_to_db("./resources/input/rooms.json", session)
-# load_students_from_json_to_db("./resources/input/students_extended.json", session)
+if input("Do you want to recreate tables and reload all records from json? (Y/N)") == "Y":
+    create_empty_tables(metadata, engine)
+    create_indexes(engine)
+    students = input("Please, enter the path to students_extended.json: ")
+    rooms = input("Please, enter the path to rooms.json: ")
+    print("wait...")
+    load_rooms_from_json_to_db(rooms, session)
+    load_students_from_json_to_db(students, session)
 
-# 1
-write_amount_in_rooms("JSON", session)
-# 2
-write_min_average_age_rooms("JSON", session)
-write_max_age_margin_rooms("JSON", session)
-write_mixed_rooms("XML", session)
+output_format = input("Please, enter the output format(JSON/XML): ")
+write_amount_in_rooms(output_format, session)
+write_min_average_age_rooms(output_format, session)
+write_max_age_margin_rooms(output_format, session)
+write_mixed_rooms(output_format, session)
