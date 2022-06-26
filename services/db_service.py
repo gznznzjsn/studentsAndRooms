@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from entities.models import Room, Student
 
 
-def load_students_from_json_to_db(filepath, session):
+def load_students_from_json_to_db(filepath: str, session: Session):
     with open(filepath) as input_file:
         strings = json.load(input_file)
     for student in strings:
@@ -20,7 +20,7 @@ def load_students_from_json_to_db(filepath, session):
     session.commit()
 
 
-def load_rooms_from_json_to_db(filepath, session):
+def load_rooms_from_json_to_db(filepath: str, session: Session):
     with open(filepath) as input_file:
         strings = json.load(input_file)
     for room in strings:
@@ -28,7 +28,7 @@ def load_rooms_from_json_to_db(filepath, session):
     session.commit()
 
 
-def declare_students_table(metadata):
+def _declare_students_table(metadata: MetaData):
     return Table("students", metadata,
                  Column('id', Integer(), primary_key=True),
                  Column('birthday', DateTime()),
@@ -40,7 +40,7 @@ def declare_students_table(metadata):
                  )
 
 
-def declare_rooms_table(metadata):
+def _declare_rooms_table(metadata: MetaData):
     return Table("rooms", metadata,
                  Column('id', Integer(), primary_key=True),
                  Column('room_id', Integer()),
@@ -56,8 +56,8 @@ def create_indexes(engine: Engine):
 
 
 def create_empty_tables(metadata: MetaData, engine: Engine):
-    declare_rooms_table(metadata)
-    declare_students_table(metadata)
+    _declare_rooms_table(metadata)
+    _declare_students_table(metadata)
     metadata.drop_all(engine)
     metadata.create_all(engine)
 
