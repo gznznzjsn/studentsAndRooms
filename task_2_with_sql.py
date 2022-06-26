@@ -1,5 +1,6 @@
-from getpass import getpass
+import os
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 
@@ -7,10 +8,12 @@ from services.db_service import write_amount_in_rooms, write_min_average_age_roo
     write_max_age_margin_rooms, write_mixed_rooms, create_indexes, create_empty_tables, load_students_from_json_to_db, \
     load_rooms_from_json_to_db
 
-host = "localhost"
-user = input("Username: ")
-password = getpass("Password: ")
-database = input("Database: ")
+load_dotenv()
+
+user = os.getenv('USERNAME')
+password = os.getenv('PASSWORD')
+host = os.getenv('HOST')
+database = os.getenv('DATABASE')
 engine = create_engine(f"mysql+mysqlconnector://{user}:{password}@{host}/{database}")
 metadata = MetaData()
 factory = sessionmaker(bind=engine)
